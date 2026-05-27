@@ -37,22 +37,22 @@ function crearSliders() {
   let spacing = 100;
   textSize(12);// Sliders para transformaciones del objeto
   sliderEscala = createSlider(0.2, 2.5, 1.0, 0.1);
-  sliderEscala.position(100, sliderY);
+  sliderEscala.position(200, sliderY);
   sliderEscala.style('width', '150px');
   sliderRotacion = createSlider(0, 360, 0, 1);
-  sliderRotacion.position(300, sliderY);
+  sliderRotacion.position(390, sliderY);
   sliderRotacion.style('width', '150px');
   sliderShear = createSlider(-1.0, 1.0, 0.0, 0.1);
-  sliderShear.position(500, sliderY);
+  sliderShear.position(580, sliderY);
   sliderShear.style('width', '150px');
   sliderProfundidad = createSlider(1, 8, 5, 1);// Sliders para fractal
-  sliderProfundidad.position(700, sliderY);
+  sliderProfundidad.position(780, sliderY);
   sliderProfundidad.style('width', '150px');
   sliderAnguloFractal = createSlider(0, 90, 30, 1);
-  sliderAnguloFractal.position(900, sliderY);
+  sliderAnguloFractal.position(990, sliderY);
   sliderAnguloFractal.style('width', '150px');
   sliderFactorFractal = createSlider(30, 80, 60, 5);
-  sliderFactorFractal.position(1100, sliderY);
+  sliderFactorFractal.position(1190, sliderY);
   sliderFactorFractal.style('width', '150px');
 }
 function draw() {// BUCLE PRINCIPAL
