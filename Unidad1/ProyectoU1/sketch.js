@@ -1,6 +1,6 @@
 /*
  * LEÓN VÁZQUEZ PAULINA ARACELI
- * GRAFICACIÓN - Unidad 1
+ * GRAFICACIÓN - Unidad 2
  * PROYECTO FINAL: Escena Interactiva 
  * Conceptos integrados:
  * Figuras geométricas, animación y tiempo discreto, interacción con mouse, color, ect.
@@ -21,12 +21,10 @@ let astro = {//  CICLO DÍA/NOCHE
   // Para la transformación gradual
   transicion: 0, // 0 a 1 (0 = sol, 1 = luna)
   velocidadTransicion: 0.02,
-  
   // Colores
   colorDia: [255, 255, 0], // Amarillo sol
   colorNoche: [200, 200, 255], // Blanco azulado luna
 };
-
 // Elementos de la escena
 let nubes = [];
 let estrellas = []; // Estrellas que aparecen de noche
@@ -138,7 +136,6 @@ for (let i = 0; i < corazones.length; i++) {// CORAZONES (EFECTO CLICK)
     c.x + 6, c.y,
     c.x, c.y + 8
   );
-
   pop();
 }
 corazones = corazones.filter(c => c.alpha > 0);// eliminar corazones viejos
@@ -225,9 +222,7 @@ noStroke();
 circle(255, 160, 20);
 circle(270, 145, 25);
 circle(285, 125, 18);
-
 pop();
-
   push();
   for (let p of particulas) {// PARTÍCULAS (rocío de día, niebla de noche)
     if (astro.esSol) {// Rocío (brillante)
