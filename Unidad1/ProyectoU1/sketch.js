@@ -1,21 +1,11 @@
-/**
+/*
  * LEÓN VÁZQUEZ PAULINA ARACELI
- * PROYECTO FINAL: Jardín 
  * GRAFICACIÓN - Unidad 1
  * PROYECTO FINAL: Escena Interactiva 
  * Conceptos integrados:
- * Figuras geométricas
- * Animación y tiempo discreto
- * Interacción con mouse
- * Color y estilos (RGB, HSB, transparencia)
- * Control de ciclo (loop/noLoop)
- * Trigonometría y movimiento circular
- * Sistemas de coordenadas
- * Efectos visuales (resplandor, partículas)
- * 
+ * Figuras geométricas, animación y tiempo discreto, interacción con mouse, color, ect.
  * Característica especial: El sol se mueve en arco y al completar
- * una vuelta se transforma en luna (y viceversa)
- */
+ * una vuelta se transforma en luna (y viceversa)*/
 // VARIABLES GLOBALES
 // Control de animación
 let animacionActiva = true;
@@ -337,28 +327,30 @@ function dibujarSuelo() {// FUNCIÓN PARA DIBUJAR SUELO
     let y = height - random(20);
     line(x, y, x + random(-5, 5), y - random(5, 15)); }
 }
-function mostrarInfo() {// FUNCIÓN PARA MOSTRAR INFORMACIÓN
-  fill(255, 255, 255, 200);// Panel de información
-  stroke(0);
-  strokeWeight(1);
-  rect(10, 10, 220, 150, 5);
-  
-  fill(0);
+function mostrarInfo() {
   noStroke();
-  textAlign(LEFT);
-  text("🐞 PROYECTO FINAL", 20, 25);
-  text("📏 Mouse: (" + mouseX + ", " + mouseY + ")", 20, 45);
-  text("⏱ Frame: " + frameCount, 20, 65);
-  text("⚡ Vel: " + velocidad + "x", 20, 85);
-  let estado = astro.esSol ? "☀️ DÍA" : "🌙 NOCHE";// Indicador día/noche
-  fill(astro.esSol ? 255 : 100, astro.esSol ? 200 : 100, 0);
-  text(estado, 20, 105);
-  fill(100);// Leyenda de controles
-  textSize(10);
-  text("[ESPACIO] Pausa", 20, 125);
-  text("[+/-] Velocidad | Click crea flor", 20, 140);
-  textAlign(CENTER);
+  fill(0, 0, 0, 80);
+  rect(13, 13, 190, 125, 30);
+
+  fill(255, 255, 255, 180);
+  stroke(120, 200, 205);
+  strokeWeight(2);
+  rect(10, 10, 190, 125, 12);
+  fill(30, 30, 30);// título
+  noStroke();
   textSize(14);
+  textAlign(LEFT);
+  text("🌿 Proyecto Final", 25, 30);
+  textSize(12);// info dinámica
+  text("📍 Mouse: (" + mouseX + ", " + mouseY + ")", 25, 55);
+  text("⏱ Tiempo: " + frameCount, 25, 75);
+  text("⚡ Velocidad: " + velocidad + "x", 25, 95);
+  if (astro.esSol) {// estado día/noche con color
+    fill(255, 180, 0);
+    text("☀️ Día activo", 25, 120); } 
+  else {
+    fill(80, 120, 255);
+    text("🌙 Noche activa", 25, 120); }
 }
 // INTERACCIÓN Y CONTROL DEL CICLO
 function keyPressed() {// ESPACIO: Pausar/Reanudar animación
