@@ -27,15 +27,14 @@ let fractalPos = { x: 950, y: 200 };// Posición del fractal (esquina superior d
 let sliderEscala, sliderRotacion, sliderShear;// Sliders - los moveremos a la parte inferior
 let sliderProfundidad, sliderAnguloFractal, sliderFactorFractal;
 function setup() {// CONFIGURACIÓN INICIAL
-  createCanvas(1300, 750);
+  createCanvas(1300, 550);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
   crearSliders();// Crear sliders en la PARTE INFERIOR
 }
-
 function crearSliders() {
-  let sliderY = 680;
-  let spacing = 180;
+  let sliderY = 550;
+  let spacing = 100;
   textSize(12);// Sliders para transformaciones del objeto
   sliderEscala = createSlider(0.2, 2.5, 1.0, 0.1);
   sliderEscala.position(100, sliderY);
@@ -62,7 +61,7 @@ function draw() {// BUCLE PRINCIPAL
   dibujarAreas();// Dibujar separadores de áreas
   dibujarCurvaBezier();//DIBUJAR CURVA BÉZIER (parte inferior izquierda)
   if (fractalVisible) {//DIBUJAR FRACTAL 
-    dibujarFractal(); }
+  dibujarFractal(); }
   dibujarObjetoPrincipal();//DIBUJAR OBJETO PRINCIPAL
   dibujarTexto();//DIBUJAR TEXTO
   dibujarControles();// CONTROLES
@@ -92,8 +91,8 @@ function actualizarDesdeSliders() {// ACTUALIZACIÓN DE VALORES
 }
 function dibujarCurvaBezier() {// 1. CURVA BÉZIER CON PUNTOS DE CONTROL MÓVILES
   push();
-  translate(-120, 0);
-  scale(0.75); //Tamaño
+  translate(-30, 0);
+  scale(0.60); //Tamaño
   stroke(150, 150, 150, 150);// Dibujar líneas guía
   strokeWeight(1);
   line(bezierPuntos[0].x, bezierPuntos[0].y, bezierPuntos[1].x, bezierPuntos[1].y);
@@ -126,60 +125,37 @@ function dibujarCurvaBezier() {// 1. CURVA BÉZIER CON PUNTOS DE CONTROL MÓVILE
     circle(bezierPuntos[puntoSeleccionado].x, bezierPuntos[puntoSeleccionado].y, 25); }
   pop();
 }
-
-// ============================================
-// 2. FRACTAL (ÁRBOL RECURSIVO)
-// ============================================
-function dibujarFractal() {
+function dibujarFractal() {// 2. FRACTAL (ÁRBOL RECURSIVO)
   push();
-  translate(fractalPos.x, fractalPos.y);
-  
-  // Dibujar tronco base
-  stroke(101, 67, 33);
+  translate(1050, 340);
+  stroke(131, 67, 33);//Tronco base
   strokeWeight(4);
   line(0, 0, 0, -40);
-  
   translate(0, -40);
-  dibujarRama(35, 0, fractalProfundidad);
+  dibujarRama(45, 0, fractalProfundidad);
   pop();
 }
-
 function dibujarRama(longitud, anguloActual, nivel) {
   if (nivel <= 0 || longitud < 2) return;
-  
-  // Aplicar rotación
-  rotate(radians(anguloActual));
-  
-  // Color según nivel (verde más oscuro en niveles profundos)
-  let verde = map(nivel, 0, fractalProfundidad, 150, 50);
+  rotate(radians(anguloActual));// Aplicar rotación
+  let verde = map(nivel, 0, fractalProfundidad, 150, 50);// Color según nivel (verde más oscuro en niveles profundos)
   stroke(34, verde, 34);
   strokeWeight(map(longitud, 2, 35, 1, 3));
-  
-  // Dibujar rama
-  line(0, 0, 0, -longitud);
-  
-  // Mover al final de la rama
-  translate(0, -longitud);
-  
-  // Crear ramas hijas
-  push();
+  line(0, 0, 0, -longitud);  // Dibujar rama
+  translate(0, -longitud);  // Mover al final de la rama
+  push();// Crear ramas hijas
   dibujarRama(longitud * fractalFactor, fractalAngulo, nivel - 1);
   pop();
-  
   push();
   dibujarRama(longitud * fractalFactor, -fractalAngulo, nivel - 1);
   pop();
-  
-  // Rama central adicional para más densidad
-  if (nivel > 2) {
+  if (nivel > 2) {// Rama central adicional para más densidad
     push();
     dibujarRama(longitud * fractalFactor * 0.7, 0, nivel - 1);
-    pop();
-  }
+    pop(); }
 }
 function dibujarObjetoPrincipal() {//OSITO
   push();
-  
   translate(pos.x, pos.y);// Transformaciones
   rotate(angulo);
   scale(escala);
@@ -207,69 +183,35 @@ function dibujarObjetoPrincipal() {//OSITO
   strokeWeight(2);
   arc(0, -20, 15, 10, 0, PI);
   fill(160, 120, 90);//PATITAS
-stroke(80, 50, 30);
-strokeWeight(2);
-ellipse(-25, 50, 25, 30); // patas traseras// izquierda
-ellipse(25, 50, 25, 30);  // derecha
-ellipse(-25, 15, 25, 30); // delanteras// pata trasera izquierda
-ellipse(25, 15, 25, 30);  // pata trasera derecha
+  stroke(80, 50, 30);
+  strokeWeight(2);
+  ellipse(-25, 50, 25, 30); // patas traseras// izquierda
+  ellipse(25, 50, 25, 30);  // derecha
+  ellipse(-25, 15, 25, 30); // delanteras// pata trasera izquierda
+  ellipse(25, 15, 25, 30);  // pata trasera derecha
   pop();
   fill(0, 0, 0);// punto de pivote
   noStroke();
   circle(pos.x, pos.y, 8);
 }
-// ============================================
-// 4. TEXTO 2D
-// ============================================
-function dibujarTexto() {
-  // Título del proyecto (arriba)
-  push();
-  translate(650, 40);
-  textSize(28);
-  fill(40, 40, 80);
-  stroke(255, 200, 200);
-  strokeWeight(1);
-  text(" PROYECTO INTEGRADOR - GRAFICACIÓN 2D", 0, 0);
-  pop();
-  
-  // Instrucciones (abajo)
-  push();
-  translate(650, 720);
-  textSize(14);
+function dibujarTexto() {// 4. TEXTO 
+  push();// Instrucciones (abajo)
+  translate(650, 0);
+  textSize(12);
   fill(60);
   stroke(255);
   strokeWeight(0.5);
-  text(" Arrastra el ROBOT para moverlo | 🔵 Arrastra puntos VERDES de la curva | 🌳 Sliders abajo", 0, 0);
-  text(" Teclas 1-2-3: cambiar modo | R: reiniciar robot | C: reiniciar curva", 0, 20);
+  text(" Arrastra el osito para moverlo | Arrastra puntos VERDES de la curva | Sliders abajo", 0, 60);
+  text(" Teclas 1-2-3: cambia modo | R: reiniciar osito | C: reiniciar curva", 0, 50);
   pop();
-  
-  // Nombre del autor
-  push();
-  translate(1200, 720);
-  textSize(16);
-  fill(100, 0, 100);
-  text(" cesar emir lizarraga felix - 16/03/2026", 0, 0);
-  pop();
-  
-  // Texto rotado decorativo
-  push();
-  translate(150, 200);
-  rotate(frameCount * 0.01);
-  fill(255, 150, 0, 150);
-  textSize(20);
-  text("⚡ ROTACIÓN ⚡", 0, 0);
-  pop();
-  
-  // Indicador de modo
-  push();
-  translate(150, 300);
+  push();// Indicador de modo
+  translate(100, 40);
   fill(0);
-  textSize(16);
-  
-  if (modoInteraccion == "objeto") fill(255, 0, 0);
+  textSize(14);
+  if (modoInteraccion == "objeto") fill(255, 50, 50);
   else fill(150);
   text("MODO: OBJETO (1)", 0, 0);
-  
+
   translate(0, 25);
   if (modoInteraccion == "curva") fill(0, 255, 0);
   else fill(150);
@@ -281,92 +223,66 @@ function dibujarTexto() {
   text("MODO: FRACTAL (3)", 0, 0);
   pop();
 }
-
-// ============================================
-// 5. CONTROLES (SLIDERS)
-// ============================================
-function dibujarControles() {
-  // Fondo para sliders
-  fill(240, 240, 240, 200);
+function dibujarControles() {// 5. CONTROLES (SLIDERS)
+  fill(190, 230, 255, 200);// Fondo para sliders
   noStroke();
-  rect(650, 660, 1200, 60);
-  
-  // Etiquetas de sliders
-  fill(0);
+  rect(650, 460, 1300, 60);
+  fill(0);  // Etiquetas de sliders
   textSize(11);
-  text("ESCALA", 170, 665);
-  text("ROTACIÓN", 370, 665);
-  text("SHEAR", 570, 665);
-  text("PROF.", 770, 665);
-  text("ÁNGULO", 970, 665);
-  text("FACTOR", 1170, 665);
-  
-  // Valores actuales
-  fill(50);
+  text("ESCALA", 170, 500);
+  text("ROTACIÓN", 370, 500);
+  text("SHEAR", 570, 500);
+  text("PROF.", 770, 500);
+  text("ÁNGULO", 970, 500);
+  text("FACTOR", 1170, 500);
+  fill(50);// Valores actuales
   textSize(10);
-  text(escala.toFixed(2), 170, 700);
-  text(sliderRotacion.value() + "°", 370, 700);
-  text(shearValor.toFixed(2), 570, 700);
-  text(fractalProfundidad, 770, 700);
-  text(fractalAngulo + "°", 970, 700);
-  text((fractalFactor*100).toFixed(0) + "%", 1170, 700);
+  text(escala.toFixed(2), 170, 510);
+  text(sliderRotacion.value() + "°", 370, 510);
+  text(shearValor.toFixed(2), 570, 510);
+  text(fractalProfundidad, 770, 510);
+  text(fractalAngulo + "°", 970, 510);
+  text((fractalFactor*100).toFixed(0) + "%", 1170, 510);
 }
-
-// ============================================
-// INTERACCIÓN CON MOUSE
-// ============================================
-function mousePressed() {
-  let d;
-  
-  if (modoInteraccion == "objeto") {
-    // Arrastrar objeto
+function mousePressed() {// INTERACCIÓN CON MOUSE
+  let d; 
+  if (modoInteraccion == "objeto") {// Arrastrar objeto
     d = dist(mouseX, mouseY, pos.x, pos.y);
     if (d < 50) {
       arrastrando = true;
       offsetX = pos.x - mouseX;
-      offsetY = pos.y - mouseY;
-    }
+      offsetY = pos.y - mouseY; }
   }
-  else if (modoInteraccion == "curva") {
-    // Seleccionar punto de curva
+  else if (modoInteraccion == "curva") {// Seleccionar punto de curva
     for (let i = 0; i < bezierPuntos.length; i++) {
       d = dist(mouseX, mouseY, bezierPuntos[i].x, bezierPuntos[i].y);
       if (d < 20) {
         puntoSeleccionado = i;
-        break;
-      }
+        break; }
     }
   }
 }
-
 function mouseDragged() {
   if (modoInteraccion == "objeto" && arrastrando) {
     pos.x = mouseX + offsetX;
-    pos.y = mouseY + offsetY;
-  }
+    pos.y = mouseY + offsetY; }
   else if (modoInteraccion == "curva" && puntoSeleccionado >= 0) {
     bezierPuntos[puntoSeleccionado].x = mouseX;
-    bezierPuntos[puntoSeleccionado].y = mouseY;
-  }
+    bezierPuntos[puntoSeleccionado].y = mouseY; }
 }
-
 function mouseReleased() {
   arrastrando = false;
-  puntoSeleccionado = -1;
-}
-
+  puntoSeleccionado = -1;}
 function mouseWheel(event) {
-  if (modoInteraccion == "objeto") {
-    // Control de escala con rueda
+  if (modoInteraccion == "objeto") { // Control de escala con rueda
     escala += event.delta * -0.001;
     escala = constrain(escala, 0.2, 2.5);
-    sliderEscala.value(escala);
-  }
+    sliderEscala.value(escala); }
   else if (modoInteraccion == "fractal") {// Control de profundidad con rueda
     fractalProfundidad += (event.delta > 0 ? -1 : 1);
     fractalProfundidad = constrain(fractalProfundidad, 1, 8);
     sliderProfundidad.value(fractalProfundidad); }
-}
+  }
 function keyPressed() {// INTERACCIÓN CON TECLADO
   if (key == '1') modoInteraccion = "objeto";// Cambiar modo de interacción
   if (key == '2') modoInteraccion = "curva";
