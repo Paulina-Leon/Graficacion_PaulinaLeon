@@ -1,5 +1,4 @@
-/*
- * LEÓN VÁZQUEZ PAULINA ARACELI
+/*LEÓN VÁZQUEZ PAULINA ARACELI
  * GRAFICACIÓN - Unidad 2
  * PROYECTO FINAL: Escena 2D Interactiva
  * Transformaciones + Curvas + Fractal + Texto*/
@@ -9,168 +8,98 @@ let pos = { x: 600, y: 350 };
 let escala = 1.0;
 let angulo = 0.0;
 let shearValor = 0.0;
-
-// Control de arrastre
-let arrastrando = false;
+let arrastrando = false;// Control de arrastre
 let offsetX, offsetY;
-
-// Puntos de control para curva Bézier
-let bezierPuntos = [
+let bezierPuntos = [// Puntos de control para curva Bézier
   { x: 200, y: 500 },  // P0 - inicio
   { x: 350, y: 300 },  // P1 - control 1
   { x: 500, y: 300 },  // P2 - control 2
   { x: 650, y: 500 }   // P3 - final
 ];
 let puntoSeleccionado = -1;
-
-// Parámetros del fractal
-let fractalProfundidad = 5;
+let fractalProfundidad = 5;// Parámetros del fractal
 let fractalAngulo = 30; // grados
 let fractalFactor = 60; // porcentaje
 let fractalVisible = true;
-
 // Control de modo
 let modoInteraccion = "objeto"; // "objeto", "curva", "fractal"
-
-// Posición del fractal (esquina superior derecha)
-let fractalPos = { x: 950, y: 200 };
-
-// Sliders - los moveremos a la parte inferior
-let sliderEscala, sliderRotacion, sliderShear;
+let fractalPos = { x: 950, y: 200 };// Posición del fractal (esquina superior derecha)
+let sliderEscala, sliderRotacion, sliderShear;// Sliders - los moveremos a la parte inferior
 let sliderProfundidad, sliderAnguloFractal, sliderFactorFractal;
-
-// ============================================
-// CONFIGURACIÓN INICIAL
-// ============================================
-function setup() {
+function setup() {// CONFIGURACIÓN INICIAL
   createCanvas(1300, 750);
   textAlign(CENTER, CENTER);
   rectMode(CENTER);
-  
-  // Crear sliders en la PARTE INFERIOR
-  crearSliders();
+  crearSliders();// Crear sliders en la PARTE INFERIOR
 }
 
 function crearSliders() {
   let sliderY = 680;
   let spacing = 180;
-  
-  // Sliders para transformaciones del objeto
-  textSize(12);
-  
+  textSize(12);// Sliders para transformaciones del objeto
   sliderEscala = createSlider(0.2, 2.5, 1.0, 0.1);
   sliderEscala.position(100, sliderY);
   sliderEscala.style('width', '150px');
-  
   sliderRotacion = createSlider(0, 360, 0, 1);
   sliderRotacion.position(300, sliderY);
   sliderRotacion.style('width', '150px');
-  
   sliderShear = createSlider(-1.0, 1.0, 0.0, 0.1);
   sliderShear.position(500, sliderY);
   sliderShear.style('width', '150px');
-  
-  // Sliders para fractal
-  sliderProfundidad = createSlider(1, 8, 5, 1);
+  sliderProfundidad = createSlider(1, 8, 5, 1);// Sliders para fractal
   sliderProfundidad.position(700, sliderY);
   sliderProfundidad.style('width', '150px');
-  
   sliderAnguloFractal = createSlider(0, 90, 30, 1);
   sliderAnguloFractal.position(900, sliderY);
   sliderAnguloFractal.style('width', '150px');
-  
   sliderFactorFractal = createSlider(30, 80, 60, 5);
   sliderFactorFractal.position(1100, sliderY);
   sliderFactorFractal.style('width', '150px');
 }
-
-// ============================================
-// BUCLE PRINCIPAL
-// ============================================
-function draw() {
-  // Fondo más claro
-  background(250, 250, 255);
-  
-  // Actualizar valores desde sliders
-  actualizarDesdeSliders();
-  
-  // Dibujar separadores de áreas
-  dibujarAreas();
-  
-  // ===== 1. DIBUJAR CURVA BÉZIER (parte inferior izquierda) =====
-  dibujarCurvaBezier();
-  
-  // ===== 2. DIBUJAR FRACTAL (parte superior derecha) =====
-  if (fractalVisible) {
-    dibujarFractal();
-  }
-  
-  // ===== 3. DIBUJAR OBJETO PRINCIPAL (centro) =====
-  dibujarObjetoPrincipal();
-  
-  // ===== 4. DIBUJAR TEXTO =====
-  dibujarTexto();
-  
-  // ===== 5. DIBUJAR CONTROLES =====
-  dibujarControles();
+function draw() {// BUCLE PRINCIPAL
+  background(250, 225, 235);
+  actualizarDesdeSliders();// Actualizar valores desde sliders
+  dibujarAreas();// Dibujar separadores de áreas
+  dibujarCurvaBezier();//DIBUJAR CURVA BÉZIER (parte inferior izquierda)
+  if (fractalVisible) {//DIBUJAR FRACTAL 
+    dibujarFractal(); }
+  dibujarObjetoPrincipal();//DIBUJAR OBJETO PRINCIPAL
+  dibujarTexto();//DIBUJAR TEXTO
+  dibujarControles();// CONTROLES
 }
-
-// ============================================
-// DIBUJAR ÁREAS DE TRABAJO
-// ============================================
-function dibujarAreas() {
+function dibujarAreas() {// DIBUJAR ÁREAS DE TRABAJO
   stroke(200);
   strokeWeight(1);
   noFill();
-  
-  // Área del objeto (centro)
-  rect(600, 350, 400, 300);
-  
-  // Área de la curva (inferior)
-  rect(400, 550, 500, 150);
-  
-  // Área del fractal (superior derecha)
-  rect(950, 200, 300, 200);
-  
-  // Etiquetas de área
-  fill(100);
+  rect(600, 250, 300, 200);// Área del objeto (centro)
+  rect(230, 250, 300, 200);// Área de la curva (inferior)
+  rect(1050, 250, 300, 200);// Área del fractal (superior derecha)
+  fill(100);// Etiquetas de área
   noStroke();
   textSize(12);
-  text(" ÁREA DEL OBJETO", 600, 200);
-  text(" ÁREA DE LA CURVA BÉZIER", 400, 480);
-  text(" ÁREA DEL FRACTAL", 950, 100);
+  text(" ÁREA DEL OBJETO", 600, 120);
+  text(" ÁREA DE LA CURVA BÉZIER", 230, 120);
+  text(" ÁREA DEL FRACTAL", 1050, 120);
 }
-
-// ============================================
-// ACTUALIZACIÓN DE VALORES
-// ============================================
-function actualizarDesdeSliders() {
+function actualizarDesdeSliders() {// ACTUALIZACIÓN DE VALORES
   // Transformaciones del objeto
   escala = sliderEscala.value();
   angulo = radians(sliderRotacion.value());
   shearValor = sliderShear.value();
-  
-  // Parámetros del fractal
-  fractalProfundidad = sliderProfundidad.value();
+  fractalProfundidad = sliderProfundidad.value();// Parámetros del fractal
   fractalAngulo = sliderAnguloFractal.value();
   fractalFactor = sliderFactorFractal.value() / 100;
 }
-
-// ============================================
-// 1. CURVA BÉZIER CON PUNTOS DE CONTROL MÓVILES
-// ============================================
-function dibujarCurvaBezier() {
+function dibujarCurvaBezier() {// 1. CURVA BÉZIER CON PUNTOS DE CONTROL MÓVILES
   push();
-  
-  // Dibujar líneas guía
-  stroke(150, 150, 150, 150);
+  translate(-120, 0);
+  scale(0.75); //Tamaño
+  stroke(150, 150, 150, 150);// Dibujar líneas guía
   strokeWeight(1);
   line(bezierPuntos[0].x, bezierPuntos[0].y, bezierPuntos[1].x, bezierPuntos[1].y);
   line(bezierPuntos[1].x, bezierPuntos[1].y, bezierPuntos[2].x, bezierPuntos[2].y);
   line(bezierPuntos[2].x, bezierPuntos[2].y, bezierPuntos[3].x, bezierPuntos[3].y);
-  
-  // Dibujar curva Bézier
-  stroke(0, 100, 255);
+  stroke(0, 100, 255);// Curva Bézier
   strokeWeight(4);
   noFill();
   bezier(
@@ -178,35 +107,23 @@ function dibujarCurvaBezier() {
     bezierPuntos[1].x, bezierPuntos[1].y,
     bezierPuntos[2].x, bezierPuntos[2].y,
     bezierPuntos[3].x, bezierPuntos[3].y
-  );
-  
-  // Dibujar puntos de control
-  for (let i = 0; i < bezierPuntos.length; i++) {
-    // Color según tipo de punto
+  );  
+  for (let i = 0; i < bezierPuntos.length; i++) {// Puntos de control
     if (i == 0 || i == 3) {
-      fill(255, 0, 0);  // Puntos extremos (rojo)
-    } else {
-      fill(0, 255, 0);  // Puntos de control (verde)
-    }
-    
+      fill(255, 0, 0); } 
+      else {
+      fill(0, 255, 0); }
     stroke(0);
     strokeWeight(1);
     circle(bezierPuntos[i].x, bezierPuntos[i].y, 15);
-    
-    // Etiqueta
     fill(0);
     noStroke();
-    text("P" + i, bezierPuntos[i].x + 20, bezierPuntos[i].y - 10);
-  }
-  
-  // Resaltar punto seleccionado
-  if (puntoSeleccionado >= 0) {
+    text("P" + i, bezierPuntos[i].x + 20, bezierPuntos[i].y - 10);  } 
+  if (puntoSeleccionado >= 0) {// Punto seleccionado
     stroke(255, 255, 0);
     strokeWeight(3);
     noFill();
-    circle(bezierPuntos[puntoSeleccionado].x, bezierPuntos[puntoSeleccionado].y, 25);
-  }
-  
+    circle(bezierPuntos[puntoSeleccionado].x, bezierPuntos[puntoSeleccionado].y, 25); }
   pop();
 }
 
@@ -445,40 +362,25 @@ function mouseWheel(event) {
     escala = constrain(escala, 0.2, 2.5);
     sliderEscala.value(escala);
   }
-  else if (modoInteraccion == "fractal") {
-    // Control de profundidad con rueda
+  else if (modoInteraccion == "fractal") {// Control de profundidad con rueda
     fractalProfundidad += (event.delta > 0 ? -1 : 1);
     fractalProfundidad = constrain(fractalProfundidad, 1, 8);
-    sliderProfundidad.value(fractalProfundidad);
-  }
+    sliderProfundidad.value(fractalProfundidad); }
 }
-
-// ============================================
-// INTERACCIÓN CON TECLADO
-// ============================================
-function keyPressed() {
-  // Cambiar modo de interacción
-  if (key == '1') modoInteraccion = "objeto";
+function keyPressed() {// INTERACCIÓN CON TECLADO
+  if (key == '1') modoInteraccion = "objeto";// Cambiar modo de interacción
   if (key == '2') modoInteraccion = "curva";
   if (key == '3') modoInteraccion = "fractal";
-  
-  // Control de movimiento con teclas (modo objeto)
-  if (modoInteraccion == "objeto") {
+  if (modoInteraccion == "objeto") {// Control de movimiento con teclas (modo objeto)
     if (keyCode == LEFT_ARROW) pos.x -= 10;
     if (keyCode == RIGHT_ARROW) pos.x += 10;
     if (keyCode == UP_ARROW) pos.y -= 10;
-    if (keyCode == DOWN_ARROW) pos.y += 10;
-  }
-  
-  // Control de parámetros del fractal (modo fractal)
-  if (modoInteraccion == "fractal") {
+    if (keyCode == DOWN_ARROW) pos.y += 10; }
+  if (modoInteraccion == "fractal") {  // Control de parámetros del fractal (modo fractal)
     if (key == '+') fractalProfundidad = min(fractalProfundidad + 1, 8);
     if (key == '-') fractalProfundidad = max(fractalProfundidad - 1, 1);
-    sliderProfundidad.value(fractalProfundidad);
-  }
-  
-  // Reiniciar posición del robot
-  if (key == 'r' || key == 'R') {
+    sliderProfundidad.value(fractalProfundidad);}
+  if (key == 'r' || key == 'R') {// Reiniciar posición del osito
     pos.x = 600;
     pos.y = 350;
     escala = 1.0;
@@ -486,16 +388,12 @@ function keyPressed() {
     shearValor = 0;
     sliderEscala.value(1.0);
     sliderRotacion.value(0);
-    sliderShear.value(0);
-  }
-  
-  // Reiniciar curva
-  if (key == 'c' || key == 'C') {
+    sliderShear.value(0); }
+  if (key == 'c' || key == 'C') {// Reiniciar curva
     bezierPuntos = [
       { x: 200, y: 500 },
       { x: 350, y: 300 },
       { x: 500, y: 300 },
       { x: 650, y: 500 }
-    ];
-  }
+    ]; }
 }
