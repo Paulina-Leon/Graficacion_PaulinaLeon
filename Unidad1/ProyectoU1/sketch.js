@@ -1,48 +1,33 @@
 /**
- * MÉTODOS NUMÉRICOS - Unidad 1
- * PROYECTO FINAL: Jardín Matemático con Ciclo Día/Noche
- * 
- * 
- * * MÉTODOS NUMÉRICOS - Unidad 1
- * PROYECTO FINAL: Escena Interactiva "Jardín Matemático"
- * 
- * 
- * 
+ * LEÓN VÁZQUEZ PAULINA ARACELI
+ * PROYECTO FINAL: Jardín 
+ * GRAFICACIÓN - Unidad 1
+ * PROYECTO FINAL: Escena Interactiva 
  * Conceptos integrados:
- * ✓ Múltiples figuras geométricas
- * ✓ Animación y tiempo discreto
- * ✓ Interacción con mouse
- * ✓ Color y estilos (RGB, HSB, transparencia)
- * ✓ Control de ciclo (loop/noLoop)
- * ✓ Trigonometría y movimiento circular
- * ✓ Sistemas de coordenadas
- * ✓ Efectos visuales (resplandor, partículas)
+ * Figuras geométricas
+ * Animación y tiempo discreto
+ * Interacción con mouse
+ * Color y estilos (RGB, HSB, transparencia)
+ * Control de ciclo (loop/noLoop)
+ * Trigonometría y movimiento circular
+ * Sistemas de coordenadas
+ * Efectos visuales (resplandor, partículas)
  * 
  * Característica especial: El sol se mueve en arco y al completar
  * una vuelta se transforma en luna (y viceversa)
  */
-
-// ============================================================
 // VARIABLES GLOBALES
-// ============================================================
-
 // Control de animación
 let animacionActiva = true;
 let velocidad = 0.5;
 
-// ============================================================
-//  CICLO DÍA/NOCHE
-// ============================================================
-let astro = {
+let astro = {//  CICLO DÍA/NOCHE
   // Posición en arco
   angulo: 0, // 0 a PI (0° a 180°)
   radio: 300, // Radio del arco
   centroX: 400, // Centro del arco
   centroY: 400, // Centro del arco
-  
-  // Tipo: true = sol, false = luna
-  esSol: true,
-  
+  esSol: true,// Tipo: true = sol, false = luna
   // Para la transformación gradual
   transicion: 0, // 0 a 1 (0 = sol, 1 = luna)
   velocidadTransicion: 0.02,
@@ -62,164 +47,101 @@ let mariposa = {
   aleteo: 0,
   direccion: 1
 };
-
-// Para efecto de partículas
-let particulas = [];
+let particulas = [];// Para efecto de partículas
 let luciernagas = []; // Aparecen de noche
 
-// ============================================================
-// CONFIGURACIÓN INICIAL
-// ============================================================
-
-function setup() {
+function setup() {// CONFIGURACIÓN INICIAL
   createCanvas(800, 500);
-  
-  // Configurar modo de color
-  colorMode(RGB);
-  
-  // Crear nubes
-  for (let i = 0; i < 3; i++) {
+  colorMode(RGB);// Configurar modo de color
+  for (let i = 0; i < 3; i++) {// Crear nubes
     nubes.push({
       x: random(200, 700),
       y: random(50, 150),
       tamaño: random(60, 100),
       velocidad: random(0.5, 0.5)
-    });
-  }
-  
-  // Crear estrellas (para la noche)
-  for (let i = 0; i < 50; i++) {
+    }); }
+  for (let i = 0; i < 50; i++) {// Crear estrellas (para la noche)
     estrellas.push({
       x: random(width),
       y: random(50, 250),
       tamaño: random(2, 5),
       brillo: random(100, 255),
       parpadeo: random(TWO_PI)
-    });
-  }
-  
-  // Crear luciérnagas (para la noche)
-  for (let i = 0; i < 8; i++) {
+    }); }
+  for (let i = 0; i < 8; i++) {// Crear luciérnagas (para la noche)
     luciernagas.push({
       x: random(width),
       y: random(250, 450),
       velocidad: random(0.5, 2),
       angulo: random(TWO_PI),
       tamaño: random(3, 6)
-    });
-  }
-  
-  
-  // Crear partículas base
-  for (let i = 0; i < 20; i++) {
+    }); }
+  for (let i = 0; i < 20; i++) {// Crear partículas base
     particulas.push({
       x: random(width),
       y: random(height),
       tamaño: random(2, 5),
       velocidad: random(1, 3)
-    });
-  }
-  
+    }); }
   textSize(14);
   textAlign(CENTER, CENTER);
 }
+function draw() {// BUCLE PRINCIPAL DE ANIMACIÓN
+  actualizarAstro();// Actualizar posición del astro (sol/luna)
+  dibujarFondoConCielo();// Dibujar fondo según el momento del día
+  dibujarSuelo();// Suelo
+  mostrarInfo();// Mostrar información de estado
 
-// ============================================================
-// BUCLE PRINCIPAL DE ANIMACIÓN
-// ============================================================
-
-function draw() {
-  // Actualizar posición del astro (sol/luna)
-  actualizarAstro();
-  
-  // Dibujar fondo según el momento del día
-  dibujarFondoConCielo();
-  
-  // Suelo
-  dibujarSuelo();
-  
-  // Mostrar información de estado
-  mostrarInfo();
-  
-  // ========================================================
-  // 🌞🌙 ASTRO (SOL O LUNA) con animación
-  // ========================================================
-  push();
-  
-  // Calcular posición en el arco
-  let astroX = astro.centroX + astro.radio * cos(astro.angulo);
+  push();// 🌞🌙 ASTRO (SOL O LUNA) con animación
+  let astroX = astro.centroX + astro.radio * cos(astro.angulo);// Calcular posición en el arco
   let astroY = astro.centroY - astro.radio * sin(astro.angulo); // Restar para que suba
-  
-  // Efecto de resplandor según el tipo
-  if (astro.esSol) {
-    // Resplandor solar (amarillo/anaranjado)
-    for (let i = 3; i > 0; i--) {
+  if (astro.esSol) {// Efecto de resplandor según el tipo
+    for (let i = 3; i > 0; i--) {// Resplandor solar (amarillo/anaranjado)
       fill(255, 200, 0, 40 - i * 10);
       noStroke();
-      circle(astroX, astroY, 120 + i * 20);
-    }
-  } else {
-    // Resplandor lunar (azul plateado)
-    for (let i = 3; i > 0; i--) {
+      circle(astroX, astroY, 120 + i * 20); }
+  } 
+  else {
+    for (let i = 3; i > 0; i--) {// Resplandor lunar (azul plateado)
       fill(200, 200, 255, 30 - i * 8);
       noStroke();
-      circle(astroX, astroY, 100 + i * 15);
-    }
+      circle(astroX, astroY, 100 + i * 15); }
   }
-  
-  // Dibujar el astro principal
-  stroke(255, 255, 255, 100);
+  stroke(255, 255, 255, 100);// Dibujar el astro principal
   strokeWeight(2);
   
   if (astro.esSol) {
-    // Sol: amarillo con rayos
-    fill(255, 255, 0);
+    fill(255, 255, 0);// Sol: amarillo con rayos
     circle(astroX, astroY, 80);
-    
-    // Rayos de sol animados
-    stroke(255, 255, 0, 150);
+    stroke(255, 255, 0, 150);// Rayos de sol animados
     strokeWeight(1);
     for (let i = 0; i < 8; i++) {
       let anguloRayo = frameCount * 0.02 + i * PI/4;
       let dx = cos(anguloRayo) * 50;
       let dy = sin(anguloRayo) * 50;
-      line(astroX, astroY, astroX + dx, astroY + dy);
-    }
-  } else {
-    // Luna: gris azulado con cráteres
-    fill(220, 220, 255);
+      line(astroX, astroY, astroX + dx, astroY + dy); }
+  } 
+  else {
+    fill(220, 220, 255);// Luna: gris azulado con cráteres
     circle(astroX, astroY, 70);
-    
-    // Cráteres
-    fill(200, 200, 240);
+    fill(200, 200, 240);// Cráteres
     noStroke();
     circle(astroX - 15, astroY - 10, 15);
     circle(astroX + 10, astroY + 5, 10);
     circle(astroX + 5, astroY - 15, 8);
-    
-    // Fase lunar (media luna simulada)
-    if (astro.transicion > 0.3 && astro.transicion < 0.7) {
+    if (astro.transicion > 0.3 && astro.transicion < 0.7) {// Fase lunar (media luna simulada)
       fill(50, 50, 80, 150);
-      circle(astroX + 10, astroY, 50);
-    }
+      circle(astroX + 10, astroY, 50); }
   }
   pop();
-  // ========================================================
-// CORAZONES (EFECTO CLICK)
-// ========================================================
-
-for (let i = 0; i < corazones.length; i++) {
+for (let i = 0; i < corazones.length; i++) {// CORAZONES (EFECTO CLICK)
   let c = corazones[i];
-
   c.y -= c.velocidad;
   c.alpha -= 3;
-
   push();
   fill(255, 80, 150, c.alpha);
-  noStroke();
-
-  // corazón pequeño hecho con círculos + triángulo
-  circle(c.x - 3, c.y, 6);
+  noStroke();  
+  circle(c.x - 3, c.y, 6);// corazón pequeño hecho con círculos y triángulo
   circle(c.x + 3, c.y, 6);
   triangle(
     c.x - 6, c.y,
