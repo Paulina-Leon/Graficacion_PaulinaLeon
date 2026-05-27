@@ -1,595 +1,501 @@
-/**
- * MÉTODOS NUMÉRICOS - Unidad 1
- * PROYECTO FINAL: Jardín Matemático con Ciclo Día/Noche
- * 
- * 
- * * MÉTODOS NUMÉRICOS - Unidad 1
- * PROYECTO FINAL: Escena Interactiva "Jardín Matemático"
- * 
- * 
- * 
- * Conceptos integrados:
- * ✓ Múltiples figuras geométricas
- * ✓ Animación y tiempo discreto
- * ✓ Interacción con mouse
- * ✓ Color y estilos (RGB, HSB, transparencia)
- * ✓ Control de ciclo (loop/noLoop)
- * ✓ Trigonometría y movimiento circular
- * ✓ Sistemas de coordenadas
- * ✓ Efectos visuales (resplandor, partículas)
- * 
- * Característica especial: El sol se mueve en arco y al completar
- * una vuelta se transforma en luna (y viceversa)
- */
-
-// ============================================================
+/*
+ * LEÓN VÁZQUEZ PAULINA ARACELI
+ * GRAFICACIÓN - Unidad 2
+ * PROYECTO FINAL: Escena 2D Interactiva
+ * Transformaciones + Curvas + Fractal + Texto*/
 // VARIABLES GLOBALES
-// ============================================================
+// Transformaciones del objeto principal
+let pos = { x: 600, y: 350 };
+let escala = 1.0;
+let angulo = 0.0;
+let shearValor = 0.0;
 
-// Control de animación
-let animacionActiva = true;
-let velocidad = 1;
+// Control de arrastre
+let arrastrando = false;
+let offsetX, offsetY;
 
-// ============================================================
-//  CICLO DÍA/NOCHE
-// ============================================================
-let astro = {
-  // Posición en arco
-  angulo: 0, // 0 a PI (0° a 180°)
-  radio: 300, // Radio del arco
-  centroX: 400, // Centro del arco
-  centroY: 400, // Centro del arco
-  
-  // Tipo: true = sol, false = luna
-  esSol: true,
-  
-  // Para la transformación gradual
-  transicion: 0, // 0 a 1 (0 = sol, 1 = luna)
-  velocidadTransicion: 0.02,
-  
-  // Colores
-  colorDia: [255, 255, 0], // Amarillo sol
-  colorNoche: [200, 200, 255], // Blanco azulado luna
-};
+// Puntos de control para curva Bézier
+let bezierPuntos = [
+  { x: 200, y: 500 },  // P0 - inicio
+  { x: 350, y: 300 },  // P1 - control 1
+  { x: 500, y: 300 },  // P2 - control 2
+  { x: 650, y: 500 }   // P3 - final
+];
+let puntoSeleccionado = -1;
 
-// Elementos de la escena
-let nubes = [];
-let estrellas = []; // Estrellas que aparecen de noche
-let flores = [];
-let mariposa = {
-  x: 400,
-  y: 200,
-  aleteo: 0,
-  direccion: 1
-};
+// Parámetros del fractal
+let fractalProfundidad = 5;
+let fractalAngulo = 30; // grados
+let fractalFactor = 60; // porcentaje
+let fractalVisible = true;
 
-// Para efecto de partículas
-let particulas = [];
-let luciernagas = []; // Aparecen de noche
+// Control de modo
+let modoInteraccion = "objeto"; // "objeto", "curva", "fractal"
 
-// ============================================================
+// Posición del fractal (esquina superior derecha)
+let fractalPos = { x: 950, y: 200 };
+
+// Sliders - los moveremos a la parte inferior
+let sliderEscala, sliderRotacion, sliderShear;
+let sliderProfundidad, sliderAnguloFractal, sliderFactorFractal;
+
+// ============================================
 // CONFIGURACIÓN INICIAL
-// ============================================================
-
+// ============================================
 function setup() {
-  createCanvas(800, 500);
-  
-  // Configurar modo de color
-  colorMode(RGB);
-  
-  // Crear nubes
-  for (let i = 0; i < 3; i++) {
-    nubes.push({
-      x: random(200, 700),
-      y: random(50, 150),
-      tamaño: random(60, 100),
-      velocidad: random(0.5, 1.5)
-    });
-  }
-  
-  // Crear estrellas (para la noche)
-  for (let i = 0; i < 50; i++) {
-    estrellas.push({
-      x: random(width),
-      y: random(50, 250),
-      tamaño: random(2, 5),
-      brillo: random(100, 255),
-      parpadeo: random(TWO_PI)
-    });
-  }
-  
-  // Crear luciérnagas (para la noche)
-  for (let i = 0; i < 8; i++) {
-    luciernagas.push({
-      x: random(width),
-      y: random(250, 450),
-      velocidad: random(0.5, 2),
-      angulo: random(TWO_PI),
-      tamaño: random(3, 6)
-    });
-  }
-  
-  // Crear flores
-  for (let i = 0; i < 5; i++) {
-    flores.push({
-      x: random(100, 700),
-      y: 400 + random(20, 60),
-      tamaño: random(30, 50),
-      colorPetalo: [random(200, 255), random(100, 200), random(100, 200)],
-      fase: random(TWO_PI) // Para animación
-    });
-  }
-  
-  // Crear partículas base
-  for (let i = 0; i < 20; i++) {
-    particulas.push({
-      x: random(width),
-      y: random(height),
-      tamaño: random(2, 5),
-      velocidad: random(1, 3)
-    });
-  }
-  
-  textSize(14);
+  createCanvas(1300, 750);
   textAlign(CENTER, CENTER);
+  rectMode(CENTER);
+  
+  // Crear sliders en la PARTE INFERIOR
+  crearSliders();
 }
 
-// ============================================================
-// BUCLE PRINCIPAL DE ANIMACIÓN
-// ============================================================
+function crearSliders() {
+  let sliderY = 680;
+  let spacing = 180;
+  
+  // Sliders para transformaciones del objeto
+  textSize(12);
+  
+  sliderEscala = createSlider(0.2, 2.5, 1.0, 0.1);
+  sliderEscala.position(100, sliderY);
+  sliderEscala.style('width', '150px');
+  
+  sliderRotacion = createSlider(0, 360, 0, 1);
+  sliderRotacion.position(300, sliderY);
+  sliderRotacion.style('width', '150px');
+  
+  sliderShear = createSlider(-1.0, 1.0, 0.0, 0.1);
+  sliderShear.position(500, sliderY);
+  sliderShear.style('width', '150px');
+  
+  // Sliders para fractal
+  sliderProfundidad = createSlider(1, 8, 5, 1);
+  sliderProfundidad.position(700, sliderY);
+  sliderProfundidad.style('width', '150px');
+  
+  sliderAnguloFractal = createSlider(0, 90, 30, 1);
+  sliderAnguloFractal.position(900, sliderY);
+  sliderAnguloFractal.style('width', '150px');
+  
+  sliderFactorFractal = createSlider(30, 80, 60, 5);
+  sliderFactorFractal.position(1100, sliderY);
+  sliderFactorFractal.style('width', '150px');
+}
 
+// ============================================
+// BUCLE PRINCIPAL
+// ============================================
 function draw() {
-  // Actualizar posición del astro (sol/luna)
-  actualizarAstro();
+  // Fondo más claro
+  background(250, 250, 255);
   
-  // Dibujar fondo según el momento del día
-  dibujarFondoConCielo();
+  // Actualizar valores desde sliders
+  actualizarDesdeSliders();
   
-  // Suelo
-  dibujarSuelo();
+  // Dibujar separadores de áreas
+  dibujarAreas();
   
-  // Mostrar información de estado
-  mostrarInfo();
+  // ===== 1. DIBUJAR CURVA BÉZIER (parte inferior izquierda) =====
+  dibujarCurvaBezier();
   
-  // ========================================================
-  // 🌞🌙 ASTRO (SOL O LUNA) con animación
-  // ========================================================
+  // ===== 2. DIBUJAR FRACTAL (parte superior derecha) =====
+  if (fractalVisible) {
+    dibujarFractal();
+  }
+  
+  // ===== 3. DIBUJAR OBJETO PRINCIPAL (centro) =====
+  dibujarObjetoPrincipal();
+  
+  // ===== 4. DIBUJAR TEXTO =====
+  dibujarTexto();
+  
+  // ===== 5. DIBUJAR CONTROLES =====
+  dibujarControles();
+}
+
+// ============================================
+// DIBUJAR ÁREAS DE TRABAJO
+// ============================================
+function dibujarAreas() {
+  stroke(200);
+  strokeWeight(1);
+  noFill();
+  
+  // Área del objeto (centro)
+  rect(600, 350, 400, 300);
+  
+  // Área de la curva (inferior)
+  rect(400, 550, 500, 150);
+  
+  // Área del fractal (superior derecha)
+  rect(950, 200, 300, 200);
+  
+  // Etiquetas de área
+  fill(100);
+  noStroke();
+  textSize(12);
+  text(" ÁREA DEL OBJETO", 600, 200);
+  text(" ÁREA DE LA CURVA BÉZIER", 400, 480);
+  text(" ÁREA DEL FRACTAL", 950, 100);
+}
+
+// ============================================
+// ACTUALIZACIÓN DE VALORES
+// ============================================
+function actualizarDesdeSliders() {
+  // Transformaciones del objeto
+  escala = sliderEscala.value();
+  angulo = radians(sliderRotacion.value());
+  shearValor = sliderShear.value();
+  
+  // Parámetros del fractal
+  fractalProfundidad = sliderProfundidad.value();
+  fractalAngulo = sliderAnguloFractal.value();
+  fractalFactor = sliderFactorFractal.value() / 100;
+}
+
+// ============================================
+// 1. CURVA BÉZIER CON PUNTOS DE CONTROL MÓVILES
+// ============================================
+function dibujarCurvaBezier() {
   push();
   
-  // Calcular posición en el arco
-  let astroX = astro.centroX + astro.radio * cos(astro.angulo);
-  let astroY = astro.centroY - astro.radio * sin(astro.angulo); // Restar para que suba
+  // Dibujar líneas guía
+  stroke(150, 150, 150, 150);
+  strokeWeight(1);
+  line(bezierPuntos[0].x, bezierPuntos[0].y, bezierPuntos[1].x, bezierPuntos[1].y);
+  line(bezierPuntos[1].x, bezierPuntos[1].y, bezierPuntos[2].x, bezierPuntos[2].y);
+  line(bezierPuntos[2].x, bezierPuntos[2].y, bezierPuntos[3].x, bezierPuntos[3].y);
   
-  // Efecto de resplandor según el tipo
-  if (astro.esSol) {
-    // Resplandor solar (amarillo/anaranjado)
-    for (let i = 3; i > 0; i--) {
-      fill(255, 200, 0, 40 - i * 10);
-      noStroke();
-      circle(astroX, astroY, 120 + i * 20);
+  // Dibujar curva Bézier
+  stroke(0, 100, 255);
+  strokeWeight(4);
+  noFill();
+  bezier(
+    bezierPuntos[0].x, bezierPuntos[0].y,
+    bezierPuntos[1].x, bezierPuntos[1].y,
+    bezierPuntos[2].x, bezierPuntos[2].y,
+    bezierPuntos[3].x, bezierPuntos[3].y
+  );
+  
+  // Dibujar puntos de control
+  for (let i = 0; i < bezierPuntos.length; i++) {
+    // Color según tipo de punto
+    if (i == 0 || i == 3) {
+      fill(255, 0, 0);  // Puntos extremos (rojo)
+    } else {
+      fill(0, 255, 0);  // Puntos de control (verde)
     }
-  } else {
-    // Resplandor lunar (azul plateado)
-    for (let i = 3; i > 0; i--) {
-      fill(200, 200, 255, 30 - i * 8);
-      noStroke();
-      circle(astroX, astroY, 100 + i * 15);
-    }
-  }
-  
-  // Dibujar el astro principal
-  stroke(255, 255, 255, 100);
-  strokeWeight(2);
-  
-  if (astro.esSol) {
-    // Sol: amarillo con rayos
-    fill(255, 255, 0);
-    circle(astroX, astroY, 80);
     
-    // Rayos de sol animados
-    stroke(255, 255, 0, 150);
+    stroke(0);
     strokeWeight(1);
-    for (let i = 0; i < 8; i++) {
-      let anguloRayo = frameCount * 0.02 + i * PI/4;
-      let dx = cos(anguloRayo) * 50;
-      let dy = sin(anguloRayo) * 50;
-      line(astroX, astroY, astroX + dx, astroY + dy);
-    }
-  } else {
-    // Luna: gris azulado con cráteres
-    fill(220, 220, 255);
-    circle(astroX, astroY, 70);
+    circle(bezierPuntos[i].x, bezierPuntos[i].y, 15);
     
-    // Cráteres
-    fill(200, 200, 240);
+    // Etiqueta
+    fill(0);
     noStroke();
-    circle(astroX - 15, astroY - 10, 15);
-    circle(astroX + 10, astroY + 5, 10);
-    circle(astroX + 5, astroY - 15, 8);
-    
-    // Fase lunar (media luna simulada)
-    if (astro.transicion > 0.3 && astro.transicion < 0.7) {
-      fill(50, 50, 80, 150);
-      circle(astroX + 10, astroY, 50);
-    }
+    text("P" + i, bezierPuntos[i].x + 20, bezierPuntos[i].y - 10);
   }
+  
+  // Resaltar punto seleccionado
+  if (puntoSeleccionado >= 0) {
+    stroke(255, 255, 0);
+    strokeWeight(3);
+    noFill();
+    circle(bezierPuntos[puntoSeleccionado].x, bezierPuntos[puntoSeleccionado].y, 25);
+  }
+  
+  pop();
+}
+
+// ============================================
+// 2. FRACTAL (ÁRBOL RECURSIVO)
+// ============================================
+function dibujarFractal() {
+  push();
+  translate(fractalPos.x, fractalPos.y);
+  
+  // Dibujar tronco base
+  stroke(101, 67, 33);
+  strokeWeight(4);
+  line(0, 0, 0, -40);
+  
+  translate(0, -40);
+  dibujarRama(35, 0, fractalProfundidad);
+  pop();
+}
+
+function dibujarRama(longitud, anguloActual, nivel) {
+  if (nivel <= 0 || longitud < 2) return;
+  
+  // Aplicar rotación
+  rotate(radians(anguloActual));
+  
+  // Color según nivel (verde más oscuro en niveles profundos)
+  let verde = map(nivel, 0, fractalProfundidad, 150, 50);
+  stroke(34, verde, 34);
+  strokeWeight(map(longitud, 2, 35, 1, 3));
+  
+  // Dibujar rama
+  line(0, 0, 0, -longitud);
+  
+  // Mover al final de la rama
+  translate(0, -longitud);
+  
+  // Crear ramas hijas
+  push();
+  dibujarRama(longitud * fractalFactor, fractalAngulo, nivel - 1);
   pop();
   
-  // ========================================================
-  // ELEMENTOS QUE CAMBIAN SEGÚN DÍA/NOCHE
-  // ========================================================
+  push();
+  dibujarRama(longitud * fractalFactor, -fractalAngulo, nivel - 1);
+  pop();
   
-  if (astro.esSol) {
-    // === DE DÍA ===
-    
-    // Nubes
-    for (let nube of nubes) {
-      push();
-      if (animacionActiva) {
-        nube.x += nube.velocidad * velocidad;
-        if (nube.x > width + 100) nube.x = -100;
-      }
-      
-      fill(255, 255, 255, 220);
-      noStroke();
-      circle(nube.x, nube.y, nube.tamaño);
-      circle(nube.x - nube.tamaño/2, nube.y - nube.tamaño/4, nube.tamaño * 0.7);
-      circle(nube.x + nube.tamaño/2, nube.y - nube.tamaño/4, nube.tamaño * 0.7);
-      pop();
-    }
-    
-    // Mariposa (solo de día)
-    dibujarMariposa();
-    
-  } else {
-    // === DE NOCHE ===
-    
-    // Estrellas titilantes
-    for (let estrella of estrellas) {
-      let brillo = estrella.brillo + sin(frameCount * 0.05 + estrella.parpadeo) * 50;
-      fill(255, 255, 200, brillo);
-      noStroke();
-      circle(estrella.x, estrella.y, estrella.tamaño);
-    }
-    
-    // Luciérnagas
-    for (let luz of luciernagas) {
-      if (animacionActiva) {
-        luz.angulo += 0.05 * velocidad;
-        luz.x += cos(luz.angulo) * luz.velocidad;
-        luz.y += sin(luz.angulo) * luz.velocidad;
-        
-        // Mantener dentro del canvas
-        if (luz.x < 0) luz.x = width;
-        if (luz.x > width) luz.x = 0;
-        if (luz.y < 200) luz.y = 200;
-        if (luz.y > 450) luz.y = 450;
-      }
-      
-      // Efecto de luz
-      for (let i = 2; i > 0; i--) {
-        fill(200, 255, 200, 30 - i * 10);
-        noStroke();
-        circle(luz.x, luz.y, luz.tamaño * 4 + i * 5);
-      }
-      
-      fill(100, 255, 100);
-      circle(luz.x, luz.y, luz.tamaño);
-    }
-  }
-  
-  // ========================================================
-  // FLORES (siempre presentes)
-  // ========================================================
-  for (let i = 0; i < flores.length; i++) {
-    let flor = flores[i];
-    
+  // Rama central adicional para más densidad
+  if (nivel > 2) {
     push();
-    // Tallo
-    stroke(34, 139, 34);
-    strokeWeight(4);
-    line(flor.x, flor.y, flor.x, flor.y - 80);
-    
-    // Hojas
-    strokeWeight(2);
-    line(flor.x, flor.y - 40, flor.x - 20, flor.y - 30);
-    line(flor.x, flor.y - 40, flor.x + 20, flor.y - 30);
-    
-    // Pétalos con animación
-    let balanceo = animacionActiva ? sin(frameCount * 0.02 + flor.fase) * 5 : 0;
-    
-    // Centro de la flor (cambia ligeramente de noche)
-    if (astro.esSol) {
-      fill(255, 215, 0); // Dorado de día
-    } else {
-      fill(200, 180, 100); // Más apagado de noche
-    }
-    noStroke();
-    circle(flor.x + balanceo * 0.5, flor.y - 80, 20);
-    
-    // Pétalos
-    for (let j = 0; j < 6; j++) {
-      let angulo = j * PI/3 + (animacionActiva ? flor.fase * 0.1 : 0);
-      let petaloX = flor.x + cos(angulo) * 25 + balanceo;
-      let petaloY = flor.y - 80 + sin(angulo) * 25;
-      
-      // Color de pétalos más apagado de noche
-      let opacidad = astro.esSol ? 200 : 150;
-      fill(flor.colorPetalo[0], flor.colorPetalo[1], flor.colorPetalo[2], opacidad);
-      circle(petaloX, petaloY, 15);
-    }
+    dibujarRama(longitud * fractalFactor * 0.7, 0, nivel - 1);
     pop();
   }
-  
-  // ========================================================
-  // CASA (siempre presente)
-  // ========================================================
+}
+function dibujarObjetoPrincipal() {//OSITO
   push();
-  // Base
-  fill(astro.esSol ? 200 : 150, 150, 100);
-  stroke(100, 50, 0);
+  
+  translate(pos.x, pos.y);// Transformaciones
+  rotate(angulo);
+  scale(escala);
+  if (shearValor != 0) {
+    shearX(shearValor); }
+  //CUERPO
+  fill(180, 140, 100); // café osito
+  stroke(80, 50, 30);
   strokeWeight(2);
-  rect(100, 320, 120, 100);
-  
-  // Techo
-  fill(astro.esSol ? 150 : 100, 50, 50);
-  triangle(80, 320, 160, 260, 240, 320);
-  
-  // Puerta
-  fill(100, 50, 20);
-  rect(145, 360, 30, 60);
-  
-  // Ventana (con luz si es de noche)
-  if (!astro.esSol) {
-    fill(255, 255, 150); // Luz encendida
-  } else {
-    fill(173, 216, 230); // Azul de día
-  }
-  circle(190, 350, 25);
-  stroke(0);
-  line(190, 338, 190, 362);
-  line(178, 350, 202, 350);
+  ellipse(0, 20, 70, 80); // cuerpo
+  fill(200, 160, 120);//CABEZA
+  ellipse(0, -40, 70, 70);
+  ellipse(-20, -75, 25, 25);// orejas
+  ellipse(20, -75, 25, 25);
+  fill(230, 190, 150);// interior orejas
+  ellipse(-20, -75, 12, 12);
+  ellipse(20, -75, 12, 12);
+  fill(0);//CARA
+  ellipse(-12, -45, 6, 6); // ojo izq
+  ellipse(12, -45, 6, 6);  // ojo der
+  fill(120, 80, 60);// nariz
+  ellipse(0, -30, 10, 8);
+  noFill();// boca
+  stroke(80, 50, 30);
+  strokeWeight(2);
+  arc(0, -20, 15, 10, 0, PI);
+  fill(160, 120, 90);//PATITAS
+stroke(80, 50, 30);
+strokeWeight(2);
+ellipse(-25, 50, 25, 30); // patas traseras// izquierda
+ellipse(25, 50, 25, 30);  // derecha
+ellipse(-25, 15, 25, 30); // delanteras// pata trasera izquierda
+ellipse(25, 15, 25, 30);  // pata trasera derecha
   pop();
-  
-  // ========================================================
-  // PARTÍCULAS (rocío de día, niebla de noche)
-  // ========================================================
-  push();
-  for (let p of particulas) {
-    if (astro.esSol) {
-      // Rocío (brillante)
-      fill(255, 255, 255, 200);
-    } else {
-      // Niebla (azul tenue)
-      fill(200, 200, 255, 100);
-    }
-    noStroke();
-    circle(p.x, p.y, p.tamaño);
-    
-    if (animacionActiva) {
-      if (astro.esSol) {
-        p.y -= p.velocidad * 0.2 * velocidad; // Rocío sube
-        if (p.y < 0) {
-          p.y = height;
-          p.x = random(width);
-        }
-      } else {
-        // Niebla se mueve lenta
-        p.x += p.velocidad * 0.1 * velocidad;
-        if (p.x > width) p.x = 0;
-      }
-    }
-  }
-  pop();
-}
-
-// ============================================================
-// FUNCIÓN PARA ACTUALIZAR EL ASTRO (SOL/LUNA)
-// ============================================================
-
-function actualizarAstro() {
-  if (animacionActiva) {
-    // Mover el astro en el arco (de izquierda a derecha)
-    astro.angulo += 0.005 * velocidad;
-    
-    // Cuando completa media vuelta (ángulo = PI)
-    if (astro.angulo >= PI) {
-      astro.angulo = 0; // Reiniciar ciclo
-      
-      // CAMBIAR DE SOL A LUNA O VICEVERSA
-      astro.esSol = !astro.esSol;
-      
-      console.log("🌞🌙 Cambio a: " + (astro.esSol ? "SOL" : "LUNA"));
-    }
-    
-    // Actualizar transición gradual (para efectos visuales)
-    if (astro.esSol) {
-      astro.transicion = max(0, astro.transicion - astro.velocidadTransicion);
-    } else {
-      astro.transicion = min(1, astro.transicion + astro.velocidadTransicion);
-    }
-  }
-}
-
-// ============================================================
-// FUNCIÓN PARA DIBUJAR EL CIELO CON GRADIENTE SEGÚN HORA
-// ============================================================
-
-function dibujarFondoConCielo() {
-  // Color del cielo basado en la posición del astro y día/noche
-  for (let i = 0; i < height/2; i++) {
-    let y = i;
-    
-    if (astro.esSol) {
-      // CIELO DE DÍA: azul variable
-      let azul = map(y, 0, height/2, 200, 150);
-      let rojo = map(y, 0, height/2, 135, 100);
-      
-      // Efecto de atardecer/amanecer cerca de los bordes
-      if (astro.angulo < 0.2 || astro.angulo > PI - 0.2) {
-        rojo += 50;
-        verde = map(y, 0, height/2, 206, 100);
-      } else {
-        verde = map(y, 0, height/2, 206, 100);
-      }
-      
-      stroke(rojo, verde, azul, 50);
-    } else {
-      // CIELO DE NOCHE: azul oscuro a negro
-      let azul = map(y, 0, height/2, 100, 20);
-      let rojo = map(y, 0, height/2, 50, 10);
-      stroke(rojo, 20, azul, 80);
-    }
-    
-    line(0, y, width, y);
-  }
-}
-
-// ============================================================
-// FUNCIÓN PARA DIBUJAR MARIPOSA
-// ============================================================
-
-function dibujarMariposa() {
-  push();
-  // La mariposa sigue al mouse suavemente
-  if (animacionActiva) {
-    mariposa.x = lerp(mariposa.x, mouseX, 0.05);
-    mariposa.y = lerp(mariposa.y, mouseY, 0.05);
-    mariposa.aleteo = (mariposa.aleteo + 0.3) % TWO_PI;
-  }
-  
-  // Cuerpo
-  fill(100, 50, 50);
+  fill(0, 0, 0);// punto de pivote
   noStroke();
-  ellipse(mariposa.x, mariposa.y, 10, 30);
-  
-  // Alas con efecto de aleteo
-  let aleteoAmplitud = sin(mariposa.aleteo) * 10;
-  
-  fill(255, 200, 255, 200);
-  stroke(200, 100, 200);
+  circle(pos.x, pos.y, 8);
+}
+// ============================================
+// 4. TEXTO 2D
+// ============================================
+function dibujarTexto() {
+  // Título del proyecto (arriba)
+  push();
+  translate(650, 40);
+  textSize(28);
+  fill(40, 40, 80);
+  stroke(255, 200, 200);
   strokeWeight(1);
-  
-  // Ala izquierda
-  ellipse(mariposa.x - 15 - aleteoAmplitud, mariposa.y - 5, 25, 20);
-  // Ala derecha
-  ellipse(mariposa.x + 15 + aleteoAmplitud, mariposa.y - 5, 25, 20);
-  
-  // Ojos
-  fill(0);
-  circle(mariposa.x - 3, mariposa.y - 8, 2);
-  circle(mariposa.x + 3, mariposa.y - 8, 2);
+  text(" PROYECTO INTEGRADOR - GRAFICACIÓN 2D", 0, 0);
   pop();
-}
-
-// ============================================================
-// FUNCIÓN PARA DIBUJAR SUELO
-// ============================================================
-
-function dibujarSuelo() {
-  // Suelo con gradiente (más oscuro de noche)
-  for (let i = height/2; i < height; i++) {
-    let verde;
-    if (astro.esSol) {
-      verde = map(i, height/2, height, 150, 50);
-    } else {
-      verde = map(i, height/2, height, 80, 20);
-    }
-    stroke(34, verde, 34, 30);
-    line(0, i, width, i);
-  }
   
-  // Detalles del suelo
-  stroke(0, 100, 0, astro.esSol ? 100 : 50);
-  strokeWeight(1);
-  for (let i = 0; i < 30; i++) {
-    let x = random(width);
-    let y = height - random(20);
-    line(x, y, x + random(-5, 5), y - random(5, 15));
-  }
-}
-
-// ============================================================
-// FUNCIÓN PARA MOSTRAR INFORMACIÓN
-// ============================================================
-
-function mostrarInfo() {
-  // Panel de información
-  fill(255, 255, 255, 200);
-  stroke(0);
-  strokeWeight(1);
-  rect(10, 10, 220, 150, 5);
-  
-  fill(0);
-  noStroke();
-  textAlign(LEFT);
-  text("🐞 PROYECTO FINAL", 20, 25);
-  text("📏 Mouse: (" + mouseX + ", " + mouseY + ")", 20, 45);
-  text("⏱ Frame: " + frameCount, 20, 65);
-  text("⚡ Vel: " + velocidad + "x", 20, 85);
-  
-  // Indicador día/noche
-  let estado = astro.esSol ? "☀️ DÍA" : "🌙 NOCHE";
-  fill(astro.esSol ? 255 : 100, astro.esSol ? 200 : 100, 0);
-  text(estado, 20, 105);
-  
-  // Leyenda de controles
-  fill(100);
-  textSize(10);
-  text("[ESPACIO] Pausa", 20, 125);
-  text("[+/-] Velocidad | Click crea flor", 20, 140);
-  textAlign(CENTER);
+  // Instrucciones (abajo)
+  push();
+  translate(650, 720);
   textSize(14);
+  fill(60);
+  stroke(255);
+  strokeWeight(0.5);
+  text(" Arrastra el ROBOT para moverlo | 🔵 Arrastra puntos VERDES de la curva | 🌳 Sliders abajo", 0, 0);
+  text(" Teclas 1-2-3: cambiar modo | R: reiniciar robot | C: reiniciar curva", 0, 20);
+  pop();
+  
+  // Nombre del autor
+  push();
+  translate(1200, 720);
+  textSize(16);
+  fill(100, 0, 100);
+  text(" cesar emir lizarraga felix - 16/03/2026", 0, 0);
+  pop();
+  
+  // Texto rotado decorativo
+  push();
+  translate(150, 200);
+  rotate(frameCount * 0.01);
+  fill(255, 150, 0, 150);
+  textSize(20);
+  text("⚡ ROTACIÓN ⚡", 0, 0);
+  pop();
+  
+  // Indicador de modo
+  push();
+  translate(150, 300);
+  fill(0);
+  textSize(16);
+  
+  if (modoInteraccion == "objeto") fill(255, 0, 0);
+  else fill(150);
+  text("MODO: OBJETO (1)", 0, 0);
+  
+  translate(0, 25);
+  if (modoInteraccion == "curva") fill(0, 255, 0);
+  else fill(150);
+  text("MODO: CURVA (2)", 0, 0);
+  
+  translate(0, 25);
+  if (modoInteraccion == "fractal") fill(0, 0, 255);
+  else fill(150);
+  text("MODO: FRACTAL (3)", 0, 0);
+  pop();
 }
 
-// ============================================================
-// INTERACCIÓN Y CONTROL DEL CICLO
-// ============================================================
+// ============================================
+// 5. CONTROLES (SLIDERS)
+// ============================================
+function dibujarControles() {
+  // Fondo para sliders
+  fill(240, 240, 240, 200);
+  noStroke();
+  rect(650, 660, 1200, 60);
+  
+  // Etiquetas de sliders
+  fill(0);
+  textSize(11);
+  text("ESCALA", 170, 665);
+  text("ROTACIÓN", 370, 665);
+  text("SHEAR", 570, 665);
+  text("PROF.", 770, 665);
+  text("ÁNGULO", 970, 665);
+  text("FACTOR", 1170, 665);
+  
+  // Valores actuales
+  fill(50);
+  textSize(10);
+  text(escala.toFixed(2), 170, 700);
+  text(sliderRotacion.value() + "°", 370, 700);
+  text(shearValor.toFixed(2), 570, 700);
+  text(fractalProfundidad, 770, 700);
+  text(fractalAngulo + "°", 970, 700);
+  text((fractalFactor*100).toFixed(0) + "%", 1170, 700);
+}
 
-function keyPressed() {
-  // ESPACIO: Pausar/Reanudar animación
-  if (key === ' ') {
-    animacionActiva = !animacionActiva;
-    if (animacionActiva) {
-      loop();
-    } else {
-      noLoop();
+// ============================================
+// INTERACCIÓN CON MOUSE
+// ============================================
+function mousePressed() {
+  let d;
+  
+  if (modoInteraccion == "objeto") {
+    // Arrastrar objeto
+    d = dist(mouseX, mouseY, pos.x, pos.y);
+    if (d < 50) {
+      arrastrando = true;
+      offsetX = pos.x - mouseX;
+      offsetY = pos.y - mouseY;
     }
   }
-  
-  // +: Aumentar velocidad
-  if (key === '+' || key === '=') {
-    velocidad = min(velocidad + 0.25, 3);
-  }
-  
-  // -: Disminuir velocidad
-  if (key === '-' || key === '_') {
-    velocidad = max(velocidad - 0.25, 0.25);
-  }
-  
-  // N: Forzar cambio día/noche
-  if (key === 'n' || key === 'N') {
-    astro.esSol = !astro.esSol;
-    console.log("🌞🌙 Cambio manual a: " + (astro.esSol ? "SOL" : "LUNA"));
+  else if (modoInteraccion == "curva") {
+    // Seleccionar punto de curva
+    for (let i = 0; i < bezierPuntos.length; i++) {
+      d = dist(mouseX, mouseY, bezierPuntos[i].x, bezierPuntos[i].y);
+      if (d < 20) {
+        puntoSeleccionado = i;
+        break;
+      }
+    }
   }
 }
 
-function mousePressed() {
-  // Al hacer clic, crear una flor nueva
-  if (mouseY < height - 50) {
-    flores.push({
-      x: mouseX,
-      y: min(mouseY + 50, height - 30),
-      tamaño: random(30, 50),
-      colorPetalo: [random(200, 255), random(100, 200), random(100, 200)],
-      fase: random(TWO_PI)
-    });
+function mouseDragged() {
+  if (modoInteraccion == "objeto" && arrastrando) {
+    pos.x = mouseX + offsetX;
+    pos.y = mouseY + offsetY;
   }
+  else if (modoInteraccion == "curva" && puntoSeleccionado >= 0) {
+    bezierPuntos[puntoSeleccionado].x = mouseX;
+    bezierPuntos[puntoSeleccionado].y = mouseY;
+  }
+}
+
+function mouseReleased() {
+  arrastrando = false;
+  puntoSeleccionado = -1;
 }
 
 function mouseWheel(event) {
-  // Cambiar velocidad del ciclo con la rueda
-  velocidad += event.delta * 0.001;
-  velocidad = constrain(velocidad, 0.25, 3);
+  if (modoInteraccion == "objeto") {
+    // Control de escala con rueda
+    escala += event.delta * -0.001;
+    escala = constrain(escala, 0.2, 2.5);
+    sliderEscala.value(escala);
+  }
+  else if (modoInteraccion == "fractal") {
+    // Control de profundidad con rueda
+    fractalProfundidad += (event.delta > 0 ? -1 : 1);
+    fractalProfundidad = constrain(fractalProfundidad, 1, 8);
+    sliderProfundidad.value(fractalProfundidad);
+  }
 }
 
+// ============================================
+// INTERACCIÓN CON TECLADO
+// ============================================
+function keyPressed() {
+  // Cambiar modo de interacción
+  if (key == '1') modoInteraccion = "objeto";
+  if (key == '2') modoInteraccion = "curva";
+  if (key == '3') modoInteraccion = "fractal";
+  
+  // Control de movimiento con teclas (modo objeto)
+  if (modoInteraccion == "objeto") {
+    if (keyCode == LEFT_ARROW) pos.x -= 10;
+    if (keyCode == RIGHT_ARROW) pos.x += 10;
+    if (keyCode == UP_ARROW) pos.y -= 10;
+    if (keyCode == DOWN_ARROW) pos.y += 10;
+  }
+  
+  // Control de parámetros del fractal (modo fractal)
+  if (modoInteraccion == "fractal") {
+    if (key == '+') fractalProfundidad = min(fractalProfundidad + 1, 8);
+    if (key == '-') fractalProfundidad = max(fractalProfundidad - 1, 1);
+    sliderProfundidad.value(fractalProfundidad);
+  }
+  
+  // Reiniciar posición del robot
+  if (key == 'r' || key == 'R') {
+    pos.x = 600;
+    pos.y = 350;
+    escala = 1.0;
+    angulo = 0;
+    shearValor = 0;
+    sliderEscala.value(1.0);
+    sliderRotacion.value(0);
+    sliderShear.value(0);
+  }
+  
+  // Reiniciar curva
+  if (key == 'c' || key == 'C') {
+    bezierPuntos = [
+      { x: 200, y: 500 },
+      { x: 350, y: 300 },
+      { x: 500, y: 300 },
+      { x: 650, y: 500 }
+    ];
+  }
+}
